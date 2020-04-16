@@ -612,7 +612,6 @@ static bool done = false;
                 writeCharacteristicUUID = [CBUUID UUIDWithString:@HC02_CHAR_RX_UUID];
                 break;
             } else {
- {
                 // ignore unknown services
             }
         }
