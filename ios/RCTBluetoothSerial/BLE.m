@@ -32,6 +32,9 @@ CBUUID *lairdServiceUUID;
 CBUUID *blueGigaServiceUUID;
 CBUUID *rongtaSerivceUUID;
 CBUUID *posnetSerivceUUID;
+CBUUID *hm10ServiceUUID;
+CBUUID *hc02ServiceUUID;
+CBUUID *hc02AdvUUID;
 CBUUID *serialServiceUUID;
 CBUUID *readCharacteristicUUID;
 CBUUID *writeCharacteristicUUID;
@@ -230,8 +233,11 @@ CBUUID *writeCharacteristicUUID;
     blueGigaServiceUUID = [CBUUID UUIDWithString:@BLUEGIGA_SERVICE_UUID];
     rongtaSerivceUUID = [CBUUID UUIDWithString:@RONGTA_SERVICE_UUID];
     posnetSerivceUUID = [CBUUID UUIDWithString:@POSNET_SERVICE_UUID];
+    hm10ServiceUUID = [CBUUID UUIDWithString:@HM10_SERVICE_UUID];
+    hc02ServiceUUID = [CBUUID UUIDWithString:@HC02_SERVICE_UUID];
+    hc02AdvUUID = [CBUUID UUIDWithString:@HC02_ADV_UUID];
 
-    NSArray *services = @[redBearLabsServiceUUID, adafruitServiceUUID, lairdServiceUUID, blueGigaServiceUUID, rongtaSerivceUUID, posnetSerivceUUID];
+    NSArray *services = @[redBearLabsServiceUUID, adafruitServiceUUID, lairdServiceUUID, blueGigaServiceUUID, rongtaSerivceUUID, posnetSerivceUUID, hm10ServiceUUID, hc02AdvUUID];
     [self.CM scanForPeripheralsWithServices:services options: nil];
 #else
     [self.CM scanForPeripheralsWithServices:nil options:nil]; // Start scanning
@@ -592,7 +598,21 @@ static bool done = false;
                 serialServiceUUID = posnetSerivceUUID;
                 readCharacteristicUUID = [CBUUID UUIDWithString:@POSNET_CHAR_TX_UUID];
                 writeCharacteristicUUID = [CBUUID UUIDWithString:@POSNET_CHAR_RX_UUID];
+            } else            } else if ([service.UUID isEqual:hm10ServiceUUID]) {
+                NSLog(@"HM-10 Bluetooth");
+                serialServiceUUID = hm10ServiceUUID;
+                readCharacteristicUUID = [CBUUID UUIDWithString:@HM10_CHAR_TX_UUID];
+                writeCharacteristicUUID = [CBUUID UUIDWithString:@HM10_CHAR_RX_UUID];
+                break;
+            } else if ([service.UUID isEqual:hc02ServiceUUID]) {
+                NSLog(@"HC-02 Bluetooth");
+                NSLog(@"Set HC-02 read write UUID");
+                serialServiceUUID = hc02ServiceUUID;
+                readCharacteristicUUID = [CBUUID UUIDWithString:@HC02_CHAR_TX_UUID];
+                writeCharacteristicUUID = [CBUUID UUIDWithString:@HC02_CHAR_RX_UUID];
+                break;
             } else {
+ {
                 // ignore unknown services
             }
         }
