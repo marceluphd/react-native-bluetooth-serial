@@ -4,6 +4,13 @@
 * Includes a `.podspec` file for iOS targets.
 * Fixes `@Override` in `RTCBluetoothSerialPackage` class for Android targets.
 
+## Install
+
+```
+npm i -S https://github.com/stephenhouser/react-native-bluetooth-serial
+react-native link
+```
+
 ---
 React Native version of [BluetoothSerial](https://github.com/don/BluetoothSerial) plugin. For both android and ios.
 
