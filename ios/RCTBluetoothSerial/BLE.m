@@ -598,7 +598,7 @@ static bool done = false;
                 serialServiceUUID = posnetSerivceUUID;
                 readCharacteristicUUID = [CBUUID UUIDWithString:@POSNET_CHAR_TX_UUID];
                 writeCharacteristicUUID = [CBUUID UUIDWithString:@POSNET_CHAR_RX_UUID];
-            } else            } else if ([service.UUID isEqual:hm10ServiceUUID]) {
+            } else if ([service.UUID isEqual:hm10ServiceUUID]) {
                 NSLog(@"HM-10 Bluetooth");
                 serialServiceUUID = hm10ServiceUUID;
                 readCharacteristicUUID = [CBUUID UUIDWithString:@HM10_CHAR_TX_UUID];
