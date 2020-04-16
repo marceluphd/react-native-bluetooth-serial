@@ -1,7 +1,11 @@
 ## React Native Bluetooth Serial
 
-React Native version of [BluetoothSerial](https://github.com/don/BluetoothSerial) plugin. For both
-android and ios
+**NOTE**: This fork fixes a few problems with the original
+* Includes a `.podspec` file for iOS targets.
+* Fixes `@Override` in `RTCBluetoothSerialPackage` class for Android targets.
+
+---
+React Native version of [BluetoothSerial](https://github.com/don/BluetoothSerial) plugin. For both android and ios.
 
 ## Compatibility
 Officialy this library supports React Native >= 0.25, it may run on older versions but no guarantees.
