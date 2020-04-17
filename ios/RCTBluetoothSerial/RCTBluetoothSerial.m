@@ -46,7 +46,10 @@ RCT_EXPORT_MODULE();
     return @[@"connectionSuccess",@"connectionLost",@"bluetoothEnabled",@"bluetoothDisabled",@"data"];
 }
 
-
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
 #pragma mark - Methods available form Javascript
 
 RCT_EXPORT_METHOD(connect:(NSString *)uuid
@@ -206,6 +209,8 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
 
 #pragma mark - BLEDelegate
 
+NSString *lastString = @"";
+
 - (void)bleDidReceiveData:(unsigned char *)data length:(int)length
 {
     NSLog(@"bleDidReceiveData");
@@ -216,10 +221,15 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
     NSLog(@"Received %@", s);
 
     if (s) {
-        [_buffer appendString:s];
+        if (![s isEqualToString:lastString]) {
 
-        if (_subscribed) {
-            [self sendDataToSubscriber]; // only sends if a delimiter is hit
+            [_buffer appendString:s];
+
+            if (_subscribed) {
+                [self sendDataToSubscriber]; // only sends if a delimiter is hit
+            }
+            
+            lastString = s;
         }
 
     } else {
@@ -367,13 +377,54 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
     return peripherals;
 }
 
+- (BOOL) filterMessage:(NSString *)message {
+    static int x = 9999;
+    static int y = 9999;
+    static int z = 9999;
+    static int p = 9999;
+    
+    char axisName = [message characterAtIndex:0];
+    int value = [[message substringFromIndex:1] intValue];
+    switch (axisName) {
+        case 'X':
+            if (x != value) {
+                x = value;
+                return true;
+            }
+            break;
+        case 'Y':
+            if (y != value) {
+                y = value;
+                return true;
+            }
+            break;
+        case 'Z':
+            if (z != value) {
+                z = value;
+                return true;
+            }
+            break;
+        case 'P':
+            if (p != value) {
+                p = value;
+                return true;
+            }
+            break;
+    }
+
+    return false;
+}
+
 // calls the JavaScript subscriber with data if we hit the _delimiter
 - (void) sendDataToSubscriber {
 
     NSString *message = [self readUntilDelimiter:_delimiter];
 
     while ([message length] > 0) {
-      [self.bridge.eventDispatcher sendDeviceEventWithName:@"data" body:@{@"data": message}];
+        if ([self filterMessage:message]) {
+            [self.bridge.eventDispatcher sendDeviceEventWithName:@"data" body:@{@"data": message}];
+        }
+        
       message = [self readUntilDelimiter:_delimiter];
     }
 
