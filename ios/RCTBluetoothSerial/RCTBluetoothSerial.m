@@ -372,8 +372,9 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
 
     NSString *message = [self readUntilDelimiter:_delimiter];
 
-    if ([message length] > 0) {
+    while ([message length] > 0) {
       [self.bridge.eventDispatcher sendDeviceEventWithName:@"data" body:@{@"data": message}];
+      message = [self readUntilDelimiter:_delimiter];
     }
 
 }
