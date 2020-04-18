@@ -1,7 +1,9 @@
 const ReactNative = require('react-native')
 const { Buffer } = require('buffer')
-const { NativeModules, DeviceEventEmitter } = ReactNative
+const { NativeModules, NativeEventEmitter } = ReactNative
 const BluetoothSerial = NativeModules.BluetoothSerial
+
+const eventEmitter = new NativeEventEmitter(BluetoothSerial);
 
 /**
  * Listen for available events
@@ -9,7 +11,7 @@ const BluetoothSerial = NativeModules.BluetoothSerial
  * @param  {Function} handler Event handler
  */
 BluetoothSerial.on = (eventName, handler) => {
-  DeviceEventEmitter.addListener(eventName, handler)
+  eventEmitter.addListener(eventName, handler);
 }
 
 /**
@@ -18,7 +20,7 @@ BluetoothSerial.on = (eventName, handler) => {
  * @param  {Function} handler Event handler
  */
 BluetoothSerial.removeListener = (eventName, handler) => {
-  DeviceEventEmitter.removeListener(eventName, handler)
+  eventEmitter.removeListener(eventName, handler)
 }
 
 /**

@@ -23,8 +23,6 @@
 
 RCT_EXPORT_MODULE();
 
-@synthesize bridge = _bridge;
-
 - (instancetype)init {
     _bleShield = [[BLE alloc] init];
     [_bleShield controlSetup];
@@ -34,29 +32,33 @@ RCT_EXPORT_MODULE();
     return self;
 }
 
-- (dispatch_queue_t)methodQueue
-{
+- (dispatch_queue_t)methodQueue {
     // run all module methods in main thread
     // if we don't no timer callbacks got called
     return dispatch_get_main_queue();
 }
 
-- (NSArray<NSString *> *)supportedEvents
-{
-    return @[@"connectionSuccess",@"connectionLost",@"bluetoothEnabled",@"bluetoothDisabled",@"data"];
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"connectionSuccess", @"connectionLost", @"bluetoothEnabled", @"bluetoothDisabled", @"data"];
 }
 
-+ (BOOL)requiresMainQueueSetup
-{
++ (BOOL)requiresMainQueueSetup {
     return YES;
 }
+
+- (void)startObserving {
+    observerCount++;
+}
+
+- (void)stopObserving {
+    observerCount--;
+}
+
 #pragma mark - Methods available form Javascript
 
 RCT_EXPORT_METHOD(connect:(NSString *)uuid
                   resolver:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
-
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSLog(@"connect");
 
     // if the uuid is null or blank, scan and
@@ -75,9 +77,7 @@ RCT_EXPORT_METHOD(connect:(NSString *)uuid
 }
 
 RCT_EXPORT_METHOD(disconnect:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
-
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSLog(@"disconnect");
 
     _connectionResolver = nil;
@@ -95,8 +95,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTPromiseResolveBlock)resolve
 
 RCT_EXPORT_METHOD(subscribe:(NSString *)delimiter
                   resolver:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSLog(@"subscribe");
 
     if (delimiter != nil) {
@@ -110,8 +109,7 @@ RCT_EXPORT_METHOD(subscribe:(NSString *)delimiter
 }
 
 RCT_EXPORT_METHOD(unsubscribe:(NSString *)delimiter
-                  resolver:(RCTPromiseResolveBlock)resolve)
-{
+                  resolver:(RCTPromiseResolveBlock)resolve) {
     NSLog(@"unsubscribe");
 
     _delimiter = nil;
@@ -122,9 +120,9 @@ RCT_EXPORT_METHOD(unsubscribe:(NSString *)delimiter
 
 RCT_EXPORT_METHOD(writeToDevice:(NSString *)message
                   resolver:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSLog(@"write");
+
     if (message != nil) {
         NSData *data = [[NSData alloc] initWithBase64EncodedString:message options:NSDataBase64DecodingIgnoreUnknownCharacters];
         [_bleShield write:data];
@@ -136,8 +134,9 @@ RCT_EXPORT_METHOD(writeToDevice:(NSString *)message
 }
 
 RCT_EXPORT_METHOD(list:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
+    NSLog(@"list");
+
     [self scanForBLEPeripherals:3];
     [NSTimer scheduledTimerWithTimeInterval:(float)3.0
                                      target:self
@@ -147,20 +146,17 @@ RCT_EXPORT_METHOD(list:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(isEnabled:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     // short delay so CBCentralManger can spin up bluetooth
     [NSTimer scheduledTimerWithTimeInterval:(float)0.2
                                      target:self
                                    selector:@selector(bluetoothStateTimer:)
                                    userInfo:resolve
                                     repeats:NO];
-
 }
 
 RCT_EXPORT_METHOD(isConnected:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     if (_bleShield.isConnected) {
         resolve((id)kCFBooleanTrue);
     } else {
@@ -169,16 +165,14 @@ RCT_EXPORT_METHOD(isConnected:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(available:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     // future versions could use messageAsNSInteger, but realistically, int is fine for buffer length
     NSNumber *buffLen = [NSNumber numberWithInteger:[_buffer length]];
     resolve(buffLen);
 }
 
 RCT_EXPORT_METHOD(read:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSString *message = @"";
 
     if ([_buffer length] > 0) {
@@ -193,14 +187,12 @@ RCT_EXPORT_METHOD(read:(RCTPromiseResolveBlock)resolve
 
 RCT_EXPORT_METHOD(readUntil:(NSString *)delimiter
                   resolver:(RCTPromiseResolveBlock)resolve
-                  rejector:(RCTPromiseRejectBlock)reject)
-{
+                  rejector:(RCTPromiseRejectBlock)reject) {
     NSString *message = [self readUntilDelimiter:delimiter];
     resolve(message);
 }
 
-RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
-{
+RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
     long end = [_buffer length] - 1;
     NSRange truncate = NSMakeRange(0, end);
     [_buffer deleteCharactersInRange:truncate];
@@ -209,10 +201,7 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve)
 
 #pragma mark - BLEDelegate
 
-NSString *lastString = @"";
-
-- (void)bleDidReceiveData:(unsigned char *)data length:(int)length
-{
+- (void)bleDidReceiveData:(unsigned char *)data length:(int)length {
     NSLog(@"bleDidReceiveData");
 
     // Append to the buffer
@@ -221,17 +210,11 @@ NSString *lastString = @"";
     NSLog(@"Received %@", s);
 
     if (s) {
-        if (![s isEqualToString:lastString]) {
+		[_buffer appendString:s];
 
-            [_buffer appendString:s];
-
-            if (_subscribed) {
-                [self sendDataToSubscriber]; // only sends if a delimiter is hit
-            }
-            
-            lastString = s;
-        }
-
+		if (_subscribed) {
+			[self sendDataToSubscriber]; // only sends if a delimiter is hit
+		}
     } else {
         NSLog(@"Error converting received data into a String.");
     }
@@ -240,53 +223,56 @@ NSString *lastString = @"";
     //if (_subscribeBytesCallbackId) {
     //    NSData* nsData = [NSData dataWithBytes:(const void *)data length:length];
     //}
-
 }
 
-- (void)bleDidChangedState:(bool)isEnabled
-{
+- (void)bleDidChangedState:(bool)isEnabled {
     NSLog(@"bleDidChangedState");
+
     NSString *eventName;
     if (isEnabled) {
         eventName = @"bluetoothEnabled";
     } else {
         eventName = @"bluetoothDisabled";
     }
-    [self.bridge.eventDispatcher sendDeviceEventWithName:eventName body:nil];
+
+    if (observerCount > 0) {
+        [self sendEventWithName:eventName body:nil];
+    }
 }
 
-- (void)bleDidConnect
-{
+- (void)bleDidConnect {
     NSLog(@"bleDidConnect");
-    [self.bridge.eventDispatcher sendDeviceEventWithName:@"connectionSuccess" body:nil];
-    //[self sendEventWithName:@"connectionSuccess" body:nil];
+
+    if (observerCount > 0) {
+        [self sendEventWithName:@"connectionSuccess" body:nil];
+    }
 
     if (_connectionResolver) {
         _connectionResolver((id)kCFBooleanTrue);
     }
 }
 
-- (void)bleDidDisconnect
-{
+- (void)bleDidDisconnect {
     // TODO is there anyway to figure out why we disconnected?
     NSLog(@"bleDidDisconnect");
-    [self.bridge.eventDispatcher sendDeviceEventWithName:@"connectionLost" body:nil];
-    //[self sendEventWithName:@"connectionLost" body:nil];
+
+    if (observerCount > 0) {
+        // [self.bridge.eventDispatcher sendDeviceEventWithName:@"connectionLost" body:nil];
+        [self sendEventWithName:@"connectionLost" body:nil];
+    }
 
     _connectionResolver = nil;
 }
 
 #pragma mark - timers
 
--(void)listPeripheralsTimer:(NSTimer *)timer
-{
+-(void)listPeripheralsTimer:(NSTimer *)timer {
     RCTPromiseResolveBlock resolve = [timer userInfo];
     NSMutableArray *peripherals = [self getPeripheralList];
     resolve(peripherals);
 }
 
--(void)connectFirstDeviceTimer:(NSTimer *)timer
-{
+-(void)connectFirstDeviceTimer:(NSTimer *)timer {
     if(_bleShield.peripherals.count > 0) {
         NSLog(@"Connecting");
         [_bleShield connectPeripheral:[_bleShield.peripherals objectAtIndex:0]];
@@ -299,8 +285,7 @@ NSString *lastString = @"";
     }
 }
 
--(void)connectUuidTimer:(NSTimer *)timer
-{
+-(void)connectUuidTimer:(NSTimer *)timer {
     NSString *uuid = [timer userInfo];
     CBPeripheral *peripheral = [self findPeripheralByUUID:uuid];
 
@@ -315,8 +300,7 @@ NSString *lastString = @"";
     }
 }
 
-- (void)bluetoothStateTimer:(NSTimer *)timer
-{
+- (void)bluetoothStateTimer:(NSTimer *)timer {
     RCTPromiseResolveBlock resolve = [timer userInfo];
     int bluetoothState = [[_bleShield CM] state];
     BOOL enabled = bluetoothState == CBCentralManagerStatePoweredOn;
@@ -330,26 +314,22 @@ NSString *lastString = @"";
 
 #pragma mark - internal implemetation
 
-- (NSString*)readUntilDelimiter: (NSString*) delimiter
-{
-
+- (NSString*)readUntilDelimiter: (NSString*) delimiter {
     NSRange range = [_buffer rangeOfString: delimiter];
     NSString *message = @"";
 
     if (range.location != NSNotFound) {
-
         long end = range.location + range.length;
         message = [_buffer substringToIndex:end];
 
         NSRange truncate = NSMakeRange(0, end);
         [_buffer deleteCharactersInRange:truncate];
     }
+
     return message;
 }
 
-- (NSMutableArray*) getPeripheralList
-{
-
+- (NSMutableArray*) getPeripheralList {
     NSMutableArray *peripherals = [NSMutableArray array];
 
     for (int i = 0; i < _bleShield.peripherals.count; i++) {
@@ -377,64 +357,19 @@ NSString *lastString = @"";
     return peripherals;
 }
 
-- (BOOL) filterMessage:(NSString *)message {
-    static int x = 9999;
-    static int y = 9999;
-    static int z = 9999;
-    static int p = 9999;
-    
-    char axisName = [message characterAtIndex:0];
-    int value = [[message substringFromIndex:1] intValue];
-    switch (axisName) {
-        case 'X':
-            if (x != value) {
-                x = value;
-                return true;
-            }
-            break;
-        case 'Y':
-            if (y != value) {
-                y = value;
-                return true;
-            }
-            break;
-        case 'Z':
-            if (z != value) {
-                z = value;
-                return true;
-            }
-            break;
-        case 'P':
-            if (p != value) {
-                p = value;
-                return true;
-            }
-            break;
-    }
-
-    return false;
-}
-
 // calls the JavaScript subscriber with data if we hit the _delimiter
 - (void) sendDataToSubscriber {
-
     NSString *message = [self readUntilDelimiter:_delimiter];
 
     while ([message length] > 0) {
-        if ([self filterMessage:message]) {
-            [self.bridge.eventDispatcher sendDeviceEventWithName:@"data" body:@{@"data": message}];
-        }
-        
-      message = [self readUntilDelimiter:_delimiter];
+		[self sendEventWithName:@"data" body:@{@"data": message}];
+      	message = [self readUntilDelimiter:_delimiter];
     }
-
 }
 
 // Ideally we'd get a callback when found, maybe _bleShield can be modified
 // to callback on centralManager:didRetrievePeripherals. For now, use a timer.
-- (void)scanForBLEPeripherals:(int)timeout
-{
-
+- (void)scanForBLEPeripherals:(int)timeout {
     NSLog(@"Scanning for BLE Peripherals");
 
     // disconnect
@@ -454,9 +389,7 @@ NSString *lastString = @"";
     [_bleShield findBLEPeripherals:timeout];
 }
 
-- (void)connectToFirstDevice
-{
-
+- (void)connectToFirstDevice {
     [self scanForBLEPeripherals:3];
 
     [NSTimer scheduledTimerWithTimeInterval:(float)3.0
@@ -466,9 +399,7 @@ NSString *lastString = @"";
                                     repeats:NO];
 }
 
-- (void)connectToUUID:(NSString *)uuid
-{
-
+- (void)connectToUUID:(NSString *)uuid {
     int interval = 0;
 
     if (_bleShield.peripherals.count < 1) {
@@ -483,9 +414,7 @@ NSString *lastString = @"";
                                     repeats:NO];
 }
 
-- (CBPeripheral*)findPeripheralByUUID:(NSString*)uuid
-{
-
+- (CBPeripheral*)findPeripheralByUUID:(NSString*)uuid {
     NSMutableArray *peripherals = [_bleShield peripherals];
     CBPeripheral *peripheral = nil;
 

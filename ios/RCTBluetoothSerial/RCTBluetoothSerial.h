@@ -6,13 +6,11 @@
 //  Copyright © 2016 Jakub Martyčák. All rights reserved.
 //
 
-#import <React/RCTBridgeModule.h>
-#import <React/RCTEventDispatcher.h>
+#import "RCTEventEmitter.h"
 
-//#import "RCTEventEmitter.h" Wasnt working properly yet, events were fired but listeneres not called
 #import "BLE.h"
 
-@interface RCTBluetoothSerial : NSObject <RCTBridgeModule,BLEDelegate> {
+@interface RCTBluetoothSerial : RCTEventEmitter <BLEDelegate> {
     BLE *_bleShield;
     BOOL _subscribed;
     RCTPromiseResolveBlock _connectionResolver;
@@ -22,5 +20,7 @@
     NSString* _rssiCallbackId;
     NSMutableString *_buffer;
     NSString *_delimiter;
+    
+    NSInteger observerCount;
 }
 @end
