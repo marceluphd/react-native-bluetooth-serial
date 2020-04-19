@@ -17,13 +17,8 @@ typedef NS_ENUM(int, AxisIndex) {
 	rpm
 };
 
-int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
-
 @interface RCTBluetoothSerial(ArduinoDRO)
-- (NSString*)readUntilDelimiter: (NSString*) delimiter;
-//- (void)sendDataToSubscriber;
 @end
- 
 
 @implementation RCTBluetoothSerial(AndroidDRO)
 
@@ -40,6 +35,8 @@ int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
 }
 
 - (BOOL) filterMessage:(NSString *)message {
+    static int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
+    
     char axisName = [message characterAtIndex:0];
 	AxisIndex axisIndex = [self fromChar:axisName];
 	if (axisIndex != noAxis) {
@@ -51,20 +48,6 @@ int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
 	}
 
 	return false;
-}
-
-// calls the JavaScript subscriber with data if we hit the _delimiter
-- (void) sendDataToSubscriber {
-    NSString *message = [self readUntilDelimiter:_delimiter];
-
-    while ([message length] > 0) {
-		if ([self filterMessage:message]) {
-            NSLog(@"Send message to JS: %@", message);
-			[self sendEventWithName:@"data" body:@{@"data": message}];
-		}
-
-      	message = [self readUntilDelimiter:_delimiter];
-    }
 }
 
 @end

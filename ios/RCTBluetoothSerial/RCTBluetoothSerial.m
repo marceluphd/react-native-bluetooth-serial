@@ -11,6 +11,7 @@
 @interface RCTBluetoothSerial()
 - (NSString *)readUntilDelimiter:(NSString *)delimiter;
 - (NSMutableArray *)getPeripheralList;
+- (BOOL)filterMessage;
 - (void)sendDataToSubscriber;
 - (CBPeripheral *)findPeripheralByUUID:(NSString *)uuid;
 - (void)connectToUUID:(NSString *)uuid;
@@ -206,12 +207,12 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
 #pragma mark - BLEDelegate
 
 - (void)bleDidReceiveData:(unsigned char *)data length:(int)length {
-//    NSLog(@"bleDidReceiveData");
+    //NSLog(@"bleDidReceiveData");
 
     // Append to the buffer
     NSData *d = [NSData dataWithBytes:data length:length];
     NSString *s = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
-//    NSLog(@"Received %@", s);
+    //NSLog(@"Received %@", s);
 
     if (s) {
 		[_buffer appendString:s];
@@ -361,12 +362,19 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
     return peripherals;
 }
 
+- (BOOL) filterMessage {
+    return true;
+}
+
 // calls the JavaScript subscriber with data if we hit the _delimiter
 - (void) sendDataToSubscriber {
     NSString *message = [self readUntilDelimiter:_delimiter];
 
     while ([message length] > 0) {
-		[self sendEventWithName:@"data" body:@{@"data": message}];
+        if ([self filterMessage]) {
+            [self sendEventWithName:@"data" body:@{@"data": message}];
+        }
+        
       	message = [self readUntilDelimiter:_delimiter];
     }
 }
