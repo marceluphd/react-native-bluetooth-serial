@@ -11,6 +11,7 @@
 		69CA06091CC43C2900AF6479 /* RCTBluetoothSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 69CA06081CC43C2900AF6479 /* RCTBluetoothSerial.m */; };
 		69CA06161CC49D5E00AF6479 /* BLE.m in Sources */ = {isa = PBXBuildFile; fileRef = 69CA06101CC49D5E00AF6479 /* BLE.m */; };
 		69CA06171CC49D5E00AF6479 /* CBPeripheral+BTSExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 69CA06131CC49D5E00AF6479 /* CBPeripheral+BTSExtensions.m */; };
+		FDC823AD244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC823AB244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,8 @@
 		69CA06111CC49D5E00AF6479 /* BLEDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEDefines.h; sourceTree = "<group>"; };
 		69CA06121CC49D5E00AF6479 /* CBPeripheral+BTSExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBPeripheral+BTSExtensions.h"; sourceTree = "<group>"; };
 		69CA06131CC49D5E00AF6479 /* CBPeripheral+BTSExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBPeripheral+BTSExtensions.m"; sourceTree = "<group>"; };
+		FDC823AB244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTBluetoothSerial+ArduinoDRO.m"; sourceTree = "<group>"; };
+		FDC823AC244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTBluetoothSerial+ArduinoDRO.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,8 @@
 		69CA06051CC43C2900AF6479 /* RCTBluetoothSerial */ = {
 			isa = PBXGroup;
 			children = (
+				FDC823AC244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.h */,
+				FDC823AB244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.m */,
 				69CA060F1CC49D5E00AF6479 /* BLE.h */,
 				69CA06101CC49D5E00AF6479 /* BLE.m */,
 				69CA06111CC49D5E00AF6479 /* BLEDefines.h */,
@@ -117,6 +122,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 69CA05FA1CC43C2900AF6479;
@@ -137,6 +143,7 @@
 				69CA06091CC43C2900AF6479 /* RCTBluetoothSerial.m in Sources */,
 				69CA06161CC49D5E00AF6479 /* BLE.m in Sources */,
 				69CA06171CC49D5E00AF6479 /* CBPeripheral+BTSExtensions.m in Sources */,
+				FDC823AD244CBBE700CC6A6C /* RCTBluetoothSerial+ArduinoDRO.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
