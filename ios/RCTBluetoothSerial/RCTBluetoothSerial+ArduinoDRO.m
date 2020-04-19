@@ -38,7 +38,7 @@ typedef NS_ENUM(int, AxisIndex) {
 }
 
 - (BOOL) filterMessage:(NSString *)message {
-    NSLog(@"Filter Message");
+    // NSLog(@"Filter Message");
     static int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
     
     char axisName = [message characterAtIndex:0];
