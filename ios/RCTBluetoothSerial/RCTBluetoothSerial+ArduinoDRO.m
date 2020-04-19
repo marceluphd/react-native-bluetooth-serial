@@ -17,11 +17,11 @@ typedef NS_ENUM(int, AxisIndex) {
 	rpm
 };
 
+int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
 
 @interface RCTBluetoothSerial(ArduinoDRO)
-int axisValues = [9999, 9999, 9999, 9999, 9999, 9999];
-
-- (void)sendDataToSubscriber;
+- (NSString*)readUntilDelimiter: (NSString*) delimiter;
+//- (void)sendDataToSubscriber;
 @end
  
 
@@ -42,11 +42,11 @@ int axisValues = [9999, 9999, 9999, 9999, 9999, 9999];
 - (BOOL) filterMessage:(NSString *)message {
     char axisName = [message characterAtIndex:0];
 	AxisIndex axisIndex = [self fromChar:axisName];
-	if (axisIndex != none) {
+	if (axisIndex != noAxis) {
 	    int value = [[message substringFromIndex:1] intValue];
 		if (value != axisValues[axisIndex]) {
-			axisValues[axisIndex];
-			return truel
+			axisValues[axisIndex] = value;
+            return true;
 		}
 	}
 
@@ -59,9 +59,10 @@ int axisValues = [9999, 9999, 9999, 9999, 9999, 9999];
 
     while ([message length] > 0) {
 		if ([self filterMessage:message]) {
+            NSLog(@"Send message to JS: %@", message);
 			[self sendEventWithName:@"data" body:@{@"data": message}];
 		}
-		
+
       	message = [self readUntilDelimiter:_delimiter];
     }
 }

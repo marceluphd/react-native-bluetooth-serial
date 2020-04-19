@@ -24,11 +24,15 @@
 RCT_EXPORT_MODULE();
 
 - (instancetype)init {
-    _bleShield = [[BLE alloc] init];
-    [_bleShield controlSetup];
-    [_bleShield setDelegate:self];
+    self = [super init];
+    if (self != nil) {
+        _bleShield = [[BLE alloc] init];
+        [_bleShield controlSetup];
+        [_bleShield setDelegate:self];
 
-    _buffer = [[NSMutableString alloc] init];
+        _buffer = [[NSMutableString alloc] init];
+    }
+    
     return self;
 }
 
@@ -202,12 +206,12 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
 #pragma mark - BLEDelegate
 
 - (void)bleDidReceiveData:(unsigned char *)data length:(int)length {
-    NSLog(@"bleDidReceiveData");
+//    NSLog(@"bleDidReceiveData");
 
     // Append to the buffer
     NSData *d = [NSData dataWithBytes:data length:length];
     NSString *s = [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
-    NSLog(@"Received %@", s);
+//    NSLog(@"Received %@", s);
 
     if (s) {
 		[_buffer appendString:s];
