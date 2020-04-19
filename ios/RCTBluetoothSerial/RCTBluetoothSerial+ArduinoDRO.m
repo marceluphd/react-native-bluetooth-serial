@@ -18,23 +18,27 @@ typedef NS_ENUM(int, AxisIndex) {
 };
 
 @interface RCTBluetoothSerial(ArduinoDRO)
+- (NSString*)readUntilDelimiter: (NSString*) delimiter;
+- (void) sendDataToSubscriber;
+- (BOOL) filterMessage:(NSString *)message;
 @end
 
 @implementation RCTBluetoothSerial(AndroidDRO)
+- (void) sendDataToSubscriber {
+    NSString *message = [self readUntilDelimiter:_delimiter];
 
-- (AxisIndex) fromChar:(char)axisSpecifier {
-	switch (axisSpecifier) {
-		case 'X': return xAxis;
-		case 'Y': return yAxis;
-		case 'Z': return zAxis;
-		case 'W': return wAxis;
-		case 'P': return rpm;
-	}
-
-	return noAxis;
+    while ([message length] > 0) {
+        if ([self filterMessage:message]) {
+            NSLog(@"Send BLE Data: %@", message);
+            [self sendEventWithName:@"data" body:@{@"data": message}];
+        }
+        
+        message = [self readUntilDelimiter:_delimiter];
+    }
 }
 
 - (BOOL) filterMessage:(NSString *)message {
+    NSLog(@"Filter Message");
     static int axisValues[6] = {9999, 9999, 9999, 9999, 9999, 9999};
     
     char axisName = [message characterAtIndex:0];
@@ -50,4 +54,15 @@ typedef NS_ENUM(int, AxisIndex) {
 	return false;
 }
 
+- (AxisIndex) fromChar:(char)axisSpecifier {
+    switch (axisSpecifier) {
+        case 'X': return xAxis;
+        case 'Y': return yAxis;
+        case 'Z': return zAxis;
+        case 'W': return wAxis;
+        case 'P': return rpm;
+    }
+
+    return noAxis;
+}
 @end

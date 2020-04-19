@@ -11,7 +11,6 @@
 @interface RCTBluetoothSerial()
 - (NSString *)readUntilDelimiter:(NSString *)delimiter;
 - (NSMutableArray *)getPeripheralList;
-- (BOOL)filterMessage;
 - (void)sendDataToSubscriber;
 - (CBPeripheral *)findPeripheralByUUID:(NSString *)uuid;
 - (void)connectToUUID:(NSString *)uuid;
@@ -362,21 +361,15 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
     return peripherals;
 }
 
-- (BOOL) filterMessage {
-    return true;
-}
-
 // calls the JavaScript subscriber with data if we hit the _delimiter
 - (void) sendDataToSubscriber {
     NSString *message = [self readUntilDelimiter:_delimiter];
 
     while ([message length] > 0) {
-        if ([self filterMessage]) {
-            NSLog(@"Send BLE Data: %@", message);
-            [self sendEventWithName:@"data" body:@{@"data": message}];
-        }
-        
-      	message = [self readUntilDelimiter:_delimiter];
+        NSLog(@"Send BLE Data: %@", message);
+        [self sendEventWithName:@"data" body:@{@"data": message}];
+
+        message = [self readUntilDelimiter:_delimiter];
     }
 }
 
