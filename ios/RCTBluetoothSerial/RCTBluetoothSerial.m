@@ -372,6 +372,7 @@ RCT_EXPORT_METHOD(clear:(RCTPromiseResolveBlock)resolve) {
 
     while ([message length] > 0) {
         if ([self filterMessage]) {
+            NSLog(@"Send BLE Data: %@", message);
             [self sendEventWithName:@"data" body:@{@"data": message}];
         }
         
